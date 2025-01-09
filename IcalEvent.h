@@ -1,29 +1,28 @@
+#ifndef ICALEVENT_H
+#define ICALEVENT_H
+
 #include <string>
-#include <iostream>
 using namespace std;
 
 class IcalEvent{
     public:
-        IcalEvent(string startDate, string endDate, string location, string program, string moment){
-            this -> startDate = startDate;
-            this -> endDate = endDate;
-            this -> location = location;
-            this -> program = program;
-            this -> moment = moment;
-        }
+        IcalEvent(string startDate, string endDate, string startTime, string endTime, string location, string program, string kurs, string moment);
 
-        void Print(){
-            cout<<startDate<<endl;
-            cout<<endDate<<endl;
-            cout<<location<<endl;
-            cout<<program<<endl;
-            cout<<moment<<endl;
-        }
+        IcalEvent(const IcalEvent& other);
+
+        IcalEvent& operator = (const IcalEvent& other);
+
+        void Print();
 
     private:
         string startDate;
         string endDate;
+        string startTime;
+        string endTime;
         string location;
         string program;
+        string kurs;
         string moment;
 };
+
+#endif
