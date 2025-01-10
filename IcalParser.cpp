@@ -1,9 +1,16 @@
 using namespace std;
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
+#include "string.h"
 
 #include "IcalEvent.h"
+
+struct dateTime{
+    string date;
+    string time;
+};
 
 /*
     Trims whitespace from beginning and end of string s
@@ -13,33 +20,27 @@ void TrimWhiteSpace(string& s){
     s.erase(s.find_last_not_of(" \t\r\n") + 1);
 }
 
-void RemoveDuplicateWords(string& s){
+/*
+Removes duplicate words from string s
+*/
+void RemoveDuplicateWords(string& s) {
     vector<string> words;
-    string temp;
-    string org = s;
+    string readWord;
     string newString;
     bool duplicateFlag = false;
 
     TrimWhiteSpace(s);
 
-    while(!s.empty()){
-        temp = s.substr(0, s.find(" "));
-        if(words.empty()){
-            words.push_back(temp);
-        }else{
-            for(string i : words){
-                if(i.compare(temp) == 0){
-                    duplicateFlag = true;
-                }
-            }
-            if(!duplicateFlag){
-                words.push_back(temp);
+    stringstream stream(s);
+
+    while(stream >> readWord){
+        for(string i : words){
+            if(i == readWord){
+                duplicateFlag = true;
             }
         }
-        s = s.substr(s.find(" ")+1, s.length());
-        if(s.find(" ") == -1){
-            // BUGGAD
-            break;
+        if(!duplicateFlag){
+            words.push_back(readWord);
         }
     }
 
@@ -48,11 +49,32 @@ void RemoveDuplicateWords(string& s){
         newString.append(" ");
     }
     s = newString;
+    TrimWhiteSpace(s);
+}
+
+string StartDateTrimmer(const string& input){
+    string newString = input.substr(strlen("DTSTART:"), input.length() - strlen("00Z"));
+
+    return newString;
+}
+
+string EndDateTrimmer(const string& input){
+    string newString = input.substr(strlen("DTEND:"), input.length() - strlen("00Z"));
+
+    return newString;
+}
+
+dateTime ParseDateTime(const string& input){
+    dateTime newDateTime;
+
+    newDateTime.date = input.substr(0, input.find("T"));
+    newDateTime.time = input.substr(input.find("T")+1, input.length());
+
+    return newDateTime;
 }
 
 int LoadFile(string fileName, vector <IcalEvent> &schedule){
     string textLine;
-    string whileCond("END:VCALENDAR");
 
     ifstream icalFile(fileName);
     if(!icalFile.good()){
@@ -70,12 +92,14 @@ int LoadFile(string fileName, vector <IcalEvent> &schedule){
     // Read BEGIN:VEVENT
     getline(icalFile, textLine);
 
-    while(textLine.compare(whileCond) != 0){
+    while(textLine.compare("END:VCALENDAR") != 0){
         string startDate;
         getline(icalFile, startDate);
-        // Trim string
-        startDate = startDate.substr(8, startDate.length()-12);
-
+        
+        // FIXA DETTA
+        dateTime start = ParseDateTime(startDate);
+        startDate = StartDateTrimmer(start.date);
+        string startTime = start.time;
         string startTime;
         startTime = startDate.substr(startDate.find("T")+1, startDate.length());
 
@@ -84,7 +108,11 @@ int LoadFile(string fileName, vector <IcalEvent> &schedule){
         string endDate;
         getline(icalFile, endDate);
         // Trim string
-        endDate = endDate.substr(6, endDate.length()-(4+6));
+        endDate = EndDateTrimmer(endDate);
+
+        cout<<startDate<<endl;
+        cout<<endDate<<endl;
+
 
         string endTime;
         endTime = endDate.substr(endDate.find("T")+1, endDate.length());
@@ -172,20 +200,19 @@ int LoadFile(string fileName, vector <IcalEvent> &schedule){
         //textLine.erase(0, textLine.find_first_not_of(" \t\r\n"));
         //textLine.erase(textLine.find_last_not_of(" \t\r\n") + 1);
     }
+
+    icalFile.close();
     return 0;
 }
 
 int main(){
-    /*vector <IcalEvent> schedule;
+    vector <IcalEvent> schedule;
     LoadFile("SchemaICAL.ics", schedule);
 
+    /*
     for(IcalEvent i : schedule){
         i.Print();
         cout<<endl;
     }
     */
-   string test = "System- och programvaruutveckling";
-   cout<<test<<endl;
-   RemoveDuplicateWords(test);
-   cout<<test<<endl;
 }
