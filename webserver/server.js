@@ -1,6 +1,8 @@
 const { createServer } = require('node:http');
 const fs = require('fs');
 const { get } = require('https');
+//const IcalEvent = require("./IcalEvent.js");
+const parseIcalFile = require("./icalParser.js").default;
 
 const hostname = 'localhost';
 const port = 3000;
@@ -10,6 +12,7 @@ const filePath = './schema.ical';
 
 const server = createServer((req, res) => {
   if(req.url === '/download'){
+    // DOWNLOAD
     get(fileUrl, (resp) => {
       if(resp.statusCode === 200){
         const fileStream = fs.createWriteStream(filePath);
@@ -25,7 +28,24 @@ const server = createServer((req, res) => {
     }).on('error', (err) =>{
       console.error('ERROR: ${err.message}');
     });
+  }else if(req.url === '/test'){
+    // TEST
+    let eventsArr = [];
+
+    parseIcalFile(filePath)
+      .then((events) => {
+        eventsArr = events;
+        console.log(eventsArr);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/plain');
+    res.end('/test');
   }else{
+    // INDEX
     fs.readFile('index.html', function(err, data){
       if(err){
         res.statusCode = 500;
@@ -43,4 +63,3 @@ const server = createServer((req, res) => {
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
-
