@@ -74,12 +74,35 @@ function parseSummary(summary: string):string[]{
   }
 
   momentStart = (summary.indexOf("Moment: "))+("Moment: ".length);
-  momentEnd = summary.indexOf("Aktivitetstyp: ");
+  momentEnd = summary.indexOf("Aktivitetstyp: ")-1;
   if(momentStart < momentEnd){
     arr[2] = summary.slice(momentStart, momentEnd);
   }
 
   return arr;
+}
+
+function removeDuplicateWords(s: string):string{
+  let newWord: string = "";
+  const arr: string[] = s.split(" ");
+  const words = new Set<string>;
+
+  for(let word of arr){
+    //console.log(word);
+    words.add(word);
+  }
+
+  for(let word of words){
+    //console.log(word);
+    newWord = newWord.concat(word);
+    newWord = newWord.concat(" ");
+  }
+
+  newWord = newWord.trimEnd();
+
+  //console.log("newword: "+newWord);
+
+  return newWord;
 }
 
 export default function parseIcalFile(filePath: string): Promise<IcalEvent[]>{
@@ -123,7 +146,10 @@ export default function parseIcalFile(filePath: string): Promise<IcalEvent[]>{
         let summaryArr: string[] = parseSummary(summary);
 
         program = summaryArr[0];
+
         kurs = summaryArr[1];
+        kurs = removeDuplicateWords(kurs);
+
         moment = summaryArr[2];
 
         const newEvent = new IcalEvent(startDate, endDate, startTime, endTime, location, program, kurs, moment);
