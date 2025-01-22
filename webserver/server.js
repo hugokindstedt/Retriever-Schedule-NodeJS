@@ -30,27 +30,86 @@ const server = createServer((req, res) => {
     });
   }else if(req.url === '/test'){
     // TEST
-    let eventsArr = [];
-
     parseIcalFile(filePath)
       .then((events) => {
-        eventsArr = events;
-        console.log(eventsArr);
+        // SKapar en fil 'test.json' med innehållet i events
+        fs.writeFile('./test.json', JSON.stringify(events), err => {
+          if(err){
+            console.error(err);
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('500: Failed to write to file')
+          }else{
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('200: File created');
+          }
+        });
       })
       .catch((error) => {
         console.error(error);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('Server error 500, failed to parse icalfile')
       });
 
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('/test');
+    
+  }else if(req.url === '/schema'){
+    fs.readFile('schema.html', function(err, data){
+      if(err){
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('Server error 500, loading schema.html failed')
+      }else{
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html');
+        res.end(data);
+      }
+    });
+  }else if(req.url === '/schema.js'){
+    fs.readFile('schema.js', function(err, data){
+      if(err){
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('500: error loading /js/schema.js')
+      }else{
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/javascript');
+        res.end(data);
+      }
+    });
+  }else if(req.url === '/output.css'){
+    fs.readFile('output.css', function(err, data){
+      if(err){
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('500: error loading /js/schema.js')
+      }else{
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/css');
+        res.end(data);
+      }
+    });
+  }else if(req.url === '/test.json'){
+    console.log("test.json called");
+    fs.readFile('test.json', function(err, data){
+      if(err){
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('Server error 500, loading schema.html failed')
+      }else{
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(data);
+      }
+    });
   }else{
     // INDEX
     fs.readFile('index.html', function(err, data){
       if(err){
         res.statusCode = 500;
         res.setHeader('Content-Type', 'text/plain');
-        res.end('Server error 500, loading file failed')
+        res.end('Server error 500, loading index.html failed')
       }else{
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
