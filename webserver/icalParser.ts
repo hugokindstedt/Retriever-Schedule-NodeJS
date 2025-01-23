@@ -152,7 +152,7 @@ export default function parseIcalFile(filePath: string): Promise<IcalEvent[]>{
 
         moment = summaryArr[2];
 
-        const newEvent = new IcalEvent(startDate, endDate, startTime, endTime, location, program, kurs, moment);
+        const newEvent: IcalEvent = {startDate, endDate, startTime, endTime, location, program, kurs, moment};
 
         events.push(newEvent);
 

@@ -7,26 +7,33 @@
 </head>
 
 <body>
-    <div id="schema">
-        <!-- EVENTS -->
+    <div id="schema" class="bg-gray-50 mx-auto max-w-sm">
+        <!-- DAYS -->
     </div>
 
+    <!-- Day template -->
+    <template id="day_card">
+        <div class="my-2 shadow bg-blue-500">
+        <!--<div class="my-2 bg-white shadow rounded hover:shadow-lg transition-shadow">-->
+
+            <h1 id="date">DATE</h2>
+            <div id="events">
+                <!-- EVENTS -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Event template -->
     <template id="event_card">
-        <div class="p-4 bg-white shadow rounded hover:shadow-lg transition-shadow">
-            <p id="time">TIME</p>
-            <p id="kurs">KURS</p>
+        <div class="p-1 bg-white">
+            <p id="time" class="font-semibold">TIME</p>
+            <p id="kurs" class="text-orange-500">KURS</p>
             <p id="moment">MOMENT</p>
             <p id="location">LOCATION</p>
         </div>
     </template>
-
-    <template id="day">
-        <div class="">
-            <h2>DAY</h2>
-        </div>
-    </template>
     
-    <body onload="templatetest()"> 
+    <body onload="createSchema()"> 
         
     <script src="schema.js"></script>
 </body>
