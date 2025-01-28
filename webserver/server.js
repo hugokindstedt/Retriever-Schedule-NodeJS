@@ -6,6 +6,7 @@ const parseIcalFile = require("./icalParser.js").default;
 //const querystring = require('node:querystring');
 const url = require('node:url');
 const { pipeline } = require('node:stream/promises');
+const { createHtmlFile } = require('./htmlFileCreator.js');
 
 
 
@@ -13,7 +14,7 @@ const hostname = 'localhost';
 const port = 3000;
 
 //const fileUrl = 'https://schema.oru.se/setup/jsp/SchemaICAL.ics?startDatum=idag&intervallTyp=m&intervallAntal=6&sprak=SV&sokMedAND=true&forklaringar=true&resurser=p.H%C3%B6gskoleingenj%C3%B6r+-+Datateknik+%C3%A5k+2-';
-//const filePath = './schema.ical';
+//const filePath = './schema.html';
 const kronoxDownloadUrl = "https://schema.oru.se/setup/jsp/SchemaICAL.ics";
 
 
@@ -79,11 +80,25 @@ const server = createServer((req, res) => {
       .then((downloadedSchema) => {
         const parsedSchema = parseIcalFile(downloadedSchema);
         
-        const schemaJson = JSON.stringify(parsedSchema)
+        createHtmlFile(parsedSchema, './test123.html');
 
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(schemaJson);
+        fs.readFile('test123.html', function(err, data){
+          if(err){
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Server error 500, loading schema.html failed')
+          }else{
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html');
+            res.end(data);
+          }
+        });        
+        
+        //const schemaJson = JSON.stringify(parsedSchema)
+
+        //res.statusCode = 200;
+        //res.setHeader('Content-Type', 'application/json');
+        //res.end(schemaJson);
       })
       .catch((error) => {
         console.error(`Error downloading schema: ${error}`);
