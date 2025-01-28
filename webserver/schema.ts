@@ -1,3 +1,4 @@
+import { link } from "fs";
 import IcalEvent from "./IcalEvent.js";
 
 function formatTime(time: string):string{
@@ -22,9 +23,7 @@ function zuluToCET(timeString: string):string{
     newTime = time.toString();
 
     if(time < 1000){
-        console.log("time!");
         newTime = "0"+newTime;
-
         return newTime
     }else{
         return newTime
@@ -65,11 +64,28 @@ function getDay(dateString: string):string{
     }
 }
 
+/*
+function addSubmitListener(){
+    console.log("hehehehhjhjjgfhsdfh!!!!");
+    let submitButton = document.querySelector("form");
+
+    submitButton?.addEventListener("submit", createSchema);
+}
+*/
+
 function getSchema(): Promise<IcalEvent[]>{
     return new Promise((resolve, reject) => {
         const schema: IcalEvent[] = [];
+
+        const urlInput = document.getElementById("hugo")! as HTMLInputElement;
+        console.log(urlInput.value);
+        let testuri:string = encodeURIComponent(urlInput.value);
+        console.log(testuri);
+        let urltest: string = `http://localhost:3000/?link=${testuri}`;
+        console.log(urltest);
+        const url = new URL(urltest);
         
-        fetch('/test.json')
+        fetch(url)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -91,8 +107,19 @@ function getSchema(): Promise<IcalEvent[]>{
 }
 
 async function createSchema(){
-    const schema = await getSchema();
+    console.log("kört");
+    
+    // Clear landing page
+    //document.body.removeChild(document.getElementById("landing")!);
 
+    let schema: IcalEvent[] = [];
+    try{
+        schema = await getSchema();
+    }catch(error){
+        console.error(`Error getting schema: ${error}`);
+        // GÖR ERROR RUTA
+        return;
+    }
     const event_template: HTMLTemplateElement = document.getElementById("event_card") as HTMLTemplateElement;
     const day_template: HTMLTemplateElement = document.getElementById("day_card") as HTMLTemplateElement;
 
@@ -151,3 +178,6 @@ async function createSchema(){
         schema.splice(0, 1);
     }
 }
+
+//var form = document.getElementById("hugo");
+//form!.addEventListener("submit", createSchema, true);
