@@ -66,10 +66,11 @@ function getDay(dateString: string):string{
     }
 }
 
-function createHtmlFile(IcalEventFile: IcalEvent[], filePath: string){
+function createHtmlFile(IcalEventFile: IcalEvent[]):string{
     const schema: string[] = [];
     let run: number = 0;
 
+    // Gör om så vi använder array.filter istället (tror den hette så)
     while(IcalEventFile.length != 0){
         run++;
         const day: IcalEvent[] = [];
@@ -99,6 +100,7 @@ function createHtmlFile(IcalEventFile: IcalEvent[], filePath: string){
         if(day.length > 1){
             // If several events on the same day
             for(let event2 of day){
+                // Döp om "tclone"
                 const tclone = renderEvent(formatTime(zuluToCET(event2.startTime))+" - "+formatTime(zuluToCET(event2.endTime)), event2.kurs, event2.moment, event2.location)
 
                 events.push(tclone);
@@ -121,11 +123,15 @@ function createHtmlFile(IcalEventFile: IcalEvent[], filePath: string){
     const renderedBody: string = renderBody(renderedSchema);
     const renderedHTML: string = renderHTML(renderedBody);
 
+    /*
     fs.writeFile(filePath, renderedHTML, (err: NodeJS.ErrnoException | null) => {
         if(err){
             console.error(err);
         }
     });
+    */
+
+    return renderedHTML;
 }
 
 module.exports = {

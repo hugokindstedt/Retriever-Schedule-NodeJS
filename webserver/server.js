@@ -7,15 +7,17 @@ const parseIcalFile = require("./icalParser.js").default;
 const url = require('node:url');
 const { pipeline } = require('node:stream/promises');
 const { createHtmlFile } = require('./htmlFileCreator.js');
+const { DatabaseSync } = require('node:sqlite');
+const { Http2ServerRequest } = require('node:http2');
 
 
-
+const protocol = 'http://';
 const hostname = 'localhost';
 const port = 3000;
 
-//const fileUrl = 'https://schema.oru.se/setup/jsp/SchemaICAL.ics?startDatum=idag&intervallTyp=m&intervallAntal=6&sprak=SV&sokMedAND=true&forklaringar=true&resurser=p.H%C3%B6gskoleingenj%C3%B6r+-+Datateknik+%C3%A5k+2-';
-//const filePath = './schema.html';
-const kronoxDownloadUrl = "https://schema.oru.se/setup/jsp/SchemaICAL.ics";
+const database = new DatabaseSync("./test.db");
+
+const kronoxSchemaURL = "https://schema.oru.se/setup/jsp/Schema.jsp?";
 
 
 /*function indexHandle(){
@@ -44,145 +46,152 @@ const routes = {
 };
 */
 
+async function createNewSchemaHtml(searchQuary){
+  const kronoxDownloadUrl = "https://schema.oru.se/setup/jsp/SchemaICAL.ics";
+
+  const fullDownloadUrl = `${kronoxDownloadUrl}${searchQuary}`;
+
+  let schema;
+  try{
+    schema = await downloadSchema(fullDownloadUrl);
+  }catch(error){
+    console.error("dlSchema failed: "+error);
+    throw error;
+  }
+
+  const parsedSchema = parseIcalFile(schema);
+
+  const createdHTML = createHtmlFile(parsedSchema);
+
+  return createdHTML;
+}
+
+function checkIfCacheOutOfDate(cachedDate, currentDate){
+  if(currentDate > cachedDate){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+/*
 function parseFileName(resurser){
   return resurser.replace(/[, ]/g, "_");
 }
+*/
 
-function downloadSchema(url){
-  return fetch(url)
-    .then((response) => {
+function parseResources(resources){
+  const parsedResources = resources.replace(/[åäö., ]/ig, (match) => {
+    const replacements = {
+      'å': 'a',
+      'ä': 'a',
+      'ö': 'o',
+      '.': '_',
+      ',': '_',
+      " ": '_'
+    };
+    return replacements[match] || match;
+  });
 
-      if(!response.ok){
-        throw new Error(`Error fetching schema: ${response.status}`);
-      }
-
-      return response.text();
-    });
+  return parsedResources;
 }
 
-const server = createServer((req, res) => {
-  const clientReqUrl = new URL(`http://${hostname}${req.url}`);
+async function checkDbForResource(resource){
+  const fetchedResource = select.get(resource);
+}
 
-  console.log(clientReqUrl.searchParams.has("link"));
-  console.log(clientReqUrl);
+async function downloadSchema(url){
+  console.log("downloadSchema called!");
+  const response = await fetch(url);
+  
+  if(!response.ok){
+    throw new Error(`502: Error fetching schema: ${response.status}`);
+  }
 
-  if(clientReqUrl.searchParams.has("link") && clientReqUrl.searchParams.get("link").startsWith("https://schema.oru.se/setup/jsp/Schema.jsp?")){
-    // SCHEMA INPUT
+  const responseText = await response.text();
 
-    
-    const kronoxReqUrl = new URL(clientReqUrl.searchParams.get("link"));
-    console.log(kronoxReqUrl);
-    console.log("URL: "+kronoxDownloadUrl+kronoxReqUrl.search);
+  // KronoX responds with an empty file if the query is incorrect
+  if(responseText === ""){
+    throw new Error("502: Kronox response is empty");
+  }
 
-    //let downloadedIcal = await downloadSchema(kronoxDownloadUrl+kronoxReqUrl.search);
+  return responseText;
+}
 
-    downloadSchema(kronoxDownloadUrl+kronoxReqUrl.search)
-      .then((downloadedSchema) => {
-        const parsedSchema = parseIcalFile(downloadedSchema);
-        
-        createHtmlFile(parsedSchema, './test123.html');
+const server = createServer(async (req, res) => {
+  const clientReqUrl = new URL(`${protocol}${hostname}${req.url}`);
 
-        fs.readFile('test123.html', function(err, data){
-          if(err){
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'text/plain');
-            res.end('Server error 500, loading schema.html failed')
-          }else{
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'text/html');
-            res.end(data);
-          }
-        });        
-        
-        //const schemaJson = JSON.stringify(parsedSchema)
+  if(clientReqUrl.searchParams.has("link") && clientReqUrl.searchParams.get("link").startsWith(kronoxSchemaURL)){
+    // SCHEMA QUERY
 
-        //res.statusCode = 200;
-        //res.setHeader('Content-Type', 'application/json');
-        //res.end(schemaJson);
-      })
-      .catch((error) => {
-        console.error(`Error downloading schema: ${error}`);
+    // Create URL from query
+    let kronoxReqUrl;
+    try{
+      kronoxReqUrl = new URL(clientReqUrl.searchParams.get("link"));
+    }catch(error){
+      console.error("Invalid URL: "+error);
 
-        res.statusCode = 500;
+      res.statusCode = 400;
+      res.setHeader("Content-Type", "text/plain");
+      res.end("400: Bad Request");
+      
+      return;
+    }
+
+    console.log("1: "+kronoxReqUrl);
+    console.log("2: "+kronoxReqUrl.search);
+
+    // FULT
+    // Get resources from query
+    let queryResource = "";
+    queryResource = kronoxReqUrl.searchParams.get("resurser");
+    if(queryResource === null){
+      res.statusCode = 400;
+      res.setHeader("Content-Type", "text/plain");
+      res.end("400: Bad Request");
+      
+      return;
+    }
+    queryResource = parseResources(queryResource);
+
+    // Check if resource is cached
+    const select = database.prepare("SELECT * FROM HtmlQuerys WHERE resource = ?");
+    const getCache = select.get(queryResource);
+
+    if(getCache === undefined){
+      // If NOT cached
+      let html;
+      try{
+        html = await createNewSchemaHtml(kronoxReqUrl.search);
+      }catch(error){
+        res.statusCode = 502;
         res.setHeader("Content-Type", "text/plain");
-        res.end("500: Internal Server Error");
-      });
-
-    /*
-    let fileName = "N/A";
-    fileName = parseFileName(kronoxReqUrl.searchParams.get("resurser"));
-    console.log(fileName);
-
-    const fileEnding = '.ical'
-    const filePath = `./scheman/${fileName}${fileEnding}`;
-
-    console.log(filePath);
-    */
-
-
-
-    /*
-    fs.readFile('schema.html', function(err, data){
-      if(err){
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('Server error 500, loading schema.html failed')
-      }else{
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/html');
-        res.end(data);
+        res.end(error.message);
       }
-    });
-    */
 
-    //res.statusCode = 200;
-    //res.setHeader('Content-Type', 'text/plain');
-    //res.end('YES BABY!'); 
-  }else if(req.url === '/download'){
-    // DOWNLOAD
-    
-  }
-  /*
-  else if(req.url === '/test'){
-    // TEST
-    parseIcalFile(filePath)
-      .then((events) => {
-        // SKapar en fil 'test.json' med innehållet i events
-        fs.writeFile('./test.json', JSON.stringify(events), err => {
-          if(err){
-            console.error(err);
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'text/plain');
-            res.end('500: Failed to write to file')
-          }else{
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'text/plain');
-            res.end('200: File created');
-          }
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('Server error 500, failed to parse icalfile')
-      });
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      res.end(html);
 
-    
-  }
-  */    
-  else if(req.url === '/schema'){
-    fs.readFile('schema.html', function(err, data){
-      if(err){
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('Server error 500, loading schema.html failed')
-      }else{
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/html');
-        res.end(data);
+      const currentDate = Date.now();
+      const halfHourInMs = 1800000;
+      const cacheDate = currentDate+halfHourInMs;
+
+      const insert = database.prepare("INSERT INTO HtmlQuerys (resource, date, htmlCOde) VALUES (?, ?, ?)");
+      const insertedItem = insert.run(queryResource, cacheDate, html);
+      console.log(insertedItem);
+    }else{
+      // If cached
+      if(checkIfCacheOutOfDate(getCache.data, currentDate)){
+        // Lägg in samma logik som om inte cached. Gör om till funktion.
       }
-    });
+      console.log("gc: "+getCache.date);
+      const cachedHtml = getCache.htmlCOde;
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      res.end(cachedHtml);
+    }
   }else if(req.url === '/schema.js'){
     fs.readFile('schema.js', function(err, data){
       if(err){
@@ -207,20 +216,7 @@ const server = createServer((req, res) => {
         res.end(data);
       }
     });
-  }else if(req.url === '/test.json'){
-    console.log("test.json called");
-    fs.readFile('test.json', function(err, data){
-      if(err){
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('Server error 500, loading schema.html failed')
-      }else{
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(data);
-      }
-    });
-  }else{
+  }else if(req.url === '/'){
     // INDEX
     fs.readFile('index.html', function(err, data){
       if(err){
@@ -233,6 +229,10 @@ const server = createServer((req, res) => {
         res.end(data);
       }
     });
+  }else{
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/plain');
+    res.end('404: Not Found')
   }
 });
 

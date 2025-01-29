@@ -50,31 +50,71 @@ function extractTime(date: string):string {
 
 function parseSummary(summary: string):string[]{
   const arr: string[] = ["N/A2", "N/A2", "N/A2"];
+  const summaryStruct = {
+    program: "NO PROGRAM",
+    kurs: "NO COURSE",
+    moment: "NO MOMENT"
+  };
   
+//Program: Kurs.grp: Sign: Moment: Aktivitetstyp:
+
   let programStart: number = 0,
   programEnd: number = 0,
   kursStart: number = 0,
   kursEnd: number = 0,
   momentStart: number = 0,
   momentEnd: number = 0;
+
+  const programExists: boolean = summary.includes("Program: ");
+  const kursExists: boolean = summary.includes("Kurs.grp: ");
+  const signExists: boolean = summary.includes("Sign: ");
+  const momentExists: boolean = summary.includes("Moment: ");
+  const aktivitetstypExists: boolean = summary.includes("Aktivitetstyp: ");
   
-  programStart = (summary.indexOf("Program: "))+("Program: ".length);
-  programEnd = summary.indexOf("Kurs.grp: ")-1;
-  if(programStart < programEnd){
+  if(programExists){
+    programStart = (summary.indexOf("Program: "))+("Program: ".length);
+    
+    if(kursExists){
+      programEnd = summary.indexOf("Kurs.grp: ")-1;
+    }else if(signExists){
+      programEnd = summary.indexOf("Sign: ")-1;
+    }else if(momentExists){
+      programEnd = summary.indexOf("Moment: ")-1;
+    }else if(aktivitetstypExists){
+      programEnd = summary.indexOf("Aktivitetstyp: ")-1;
+    }
+    
     arr[0] = summary.slice(programStart, programEnd);
   }
   
-  kursStart = (summary.indexOf("Kurs.grp: "))+("Kurs.grp: ".length);
-  kursEnd = summary.indexOf("Sign: ")-1;
-  if(kursStart < kursEnd){
+  if(kursExists){
+    kursStart = (summary.indexOf("Kurs.grp: "))+("Kurs.grp: ".length);
+
+    if(signExists){
+      kursEnd = summary.indexOf("Sign: ")-1;
+    }else if(momentExists){
+      kursEnd = summary.indexOf("Moment: ")-1;
+    }else if(aktivitetstypExists){
+      kursEnd = summary.indexOf("Aktivitetstyp: ")-1;
+    }else{
+      kursEnd = summary.length -1;
+    }
+
     arr[1] = summary.slice(kursStart, kursEnd);
   }
-  
-  momentStart = (summary.indexOf("Moment: "))+("Moment: ".length);
-  momentEnd = summary.indexOf("Aktivitetstyp: ")-1;
-  if(momentStart < momentEnd){
+
+  if(momentExists){
+    momentStart = (summary.indexOf("Moment: "))+("Moment: ".length);
+
+    if(aktivitetstypExists){
+      momentEnd = summary.indexOf("Aktivitetstyp: ")-1;
+    }else{
+      momentEnd = summary.length -1;
+    }
+    
     arr[2] = summary.slice(momentStart, momentEnd);
   }
+  
   
   return arr;
 }
@@ -115,9 +155,11 @@ export default function parseIcalToJson(icalFile: string): IcalEvent[]{
   
   const events: IcalEvent[] = [];
 
+  /*
   if(icalFile !== 'string'){
     console.log("WTF");
   }
+  */
   
   const icalFileLines = icalFile.split(/\r?\n/);
   
