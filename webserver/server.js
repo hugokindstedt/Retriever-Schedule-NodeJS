@@ -5,19 +5,17 @@ const { get } = require('https');
 const parseIcalFile = require("./icalParser.js").default;
 //const querystring = require('node:querystring');
 const url = require('node:url');
-const { pipeline } = require('node:stream/promises');
 const { createHtmlFile } = require('./htmlFileCreator.js');
 const { DatabaseSync } = require('node:sqlite');
-const { Http2ServerRequest } = require('node:http2');
 
 
 const protocol = 'http://';
 const hostname = 'localhost';
 const port = 3000;
 
-const database = new DatabaseSync("./test.db");
+const database = new DatabaseSync("./cache.db");
 
-const kronoxSchemaURL = "https://schema.oru.se/setup/jsp/Schema.jsp?";
+
 
 
 /*function indexHandle(){
@@ -66,7 +64,9 @@ async function createNewSchemaHtml(searchQuary){
   return createdHTML;
 }
 
-function checkIfCacheOutOfDate(cachedDate, currentDate){
+function checkIfCacheOutOfDate(cachedDate){
+  const currentDate = Date.now();
+
   if(currentDate > cachedDate){
     return true;
   }else{
@@ -96,9 +96,12 @@ function parseResources(resources){
   return parsedResources;
 }
 
+// FIXA
+/*
 async function checkDbForResource(resource){
   const fetchedResource = select.get(resource);
 }
+*/
 
 async function downloadSchema(url){
   console.log("downloadSchema called!");
@@ -118,8 +121,20 @@ async function downloadSchema(url){
   return responseText;
 }
 
+function cacheHtml(queryResource, html){
+  const currentDate = Date.now();
+  const fourHoursInMs = 21600000;
+  const expirationDate = currentDate+fourHoursInMs;
+
+  const insert = database.prepare("INSERT INTO cache (resource, expiration, html) VALUES (?, ?, ?)");
+  const insertedItem = insert.run(queryResource, expirationDate, html);
+
+  console.log(insertedItem);
+}
+
 const server = createServer(async (req, res) => {
   const clientReqUrl = new URL(`${protocol}${hostname}${req.url}`);
+  const kronoxSchemaURL = "https://schema.oru.se/setup/jsp/Schema.jsp?";
 
   if(clientReqUrl.searchParams.has("link") && clientReqUrl.searchParams.get("link").startsWith(kronoxSchemaURL)){
     // SCHEMA QUERY
@@ -155,7 +170,7 @@ const server = createServer(async (req, res) => {
     queryResource = parseResources(queryResource);
 
     // Check if resource is cached
-    const select = database.prepare("SELECT * FROM HtmlQuerys WHERE resource = ?");
+    const select = database.prepare("SELECT * FROM cache WHERE resource = ?");
     const getCache = select.get(queryResource);
 
     if(getCache === undefined){
@@ -173,20 +188,33 @@ const server = createServer(async (req, res) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(html);
 
-      const currentDate = Date.now();
-      const halfHourInMs = 1800000;
-      const cacheDate = currentDate+halfHourInMs;
-
-      const insert = database.prepare("INSERT INTO HtmlQuerys (resource, date, htmlCOde) VALUES (?, ?, ?)");
-      const insertedItem = insert.run(queryResource, cacheDate, html);
-      console.log(insertedItem);
+      cacheHtml(queryResource, html);
     }else{
       // If cached
-      if(checkIfCacheOutOfDate(getCache.data, currentDate)){
+      currentDate = Date(Date.now());
+      console.log("CT: "+currentDate);
+
+      if(checkIfCacheOutOfDate(getCache.expiration)){
         // Lägg in samma logik som om inte cached. Gör om till funktion.
+        let html;
+        try{
+          html = await createNewSchemaHtml(kronoxReqUrl.search);
+        }catch(error){
+          res.statusCode = 502;
+          res.setHeader("Content-Type", "text/plain");
+          res.end(error.message);
+        }
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html');
+        res.end(html);
+
+        cacheHtml(queryResource, html);
       }
-      console.log("gc: "+getCache.date);
-      const cachedHtml = getCache.htmlCOde;
+
+      expdatum = new Date(getCache.expiration)
+      console.log("gc: "+expdatum);
+      const cachedHtml = getCache.html;
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/html');
