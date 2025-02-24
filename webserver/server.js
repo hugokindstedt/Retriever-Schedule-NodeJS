@@ -132,6 +132,17 @@ function cacheHtml(queryResource, html){
   console.log(insertedItem);
 }
 
+function updateCache(queryResource, html){
+  const currentDate = Date.now();
+  const fourHoursInMs = 21600000;
+  const expirationDate = currentDate+fourHoursInMs;
+
+  const update = database.prepare("UPDATE cache SET expiration = ?, html = ? WHERE resource = ?");
+  const insertedItem = insert.run(expirationDate, html, queryResource);
+
+  console.log(insertedItem);
+}
+
 const server = createServer(async (req, res) => {
   const clientReqUrl = new URL(`${protocol}${hostname}${req.url}`);
   const kronoxSchemaURL = "https://schema.oru.se/setup/jsp/Schema.jsp?";
@@ -182,6 +193,8 @@ const server = createServer(async (req, res) => {
         res.statusCode = 502;
         res.setHeader("Content-Type", "text/plain");
         res.end(error.message);
+
+        return;
       }
 
       res.statusCode = 200;
@@ -203,13 +216,15 @@ const server = createServer(async (req, res) => {
           res.statusCode = 502;
           res.setHeader("Content-Type", "text/plain");
           res.end(error.message);
+
+          return;
         }
 
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.end(html);
 
-        cacheHtml(queryResource, html);
+        updateCache(queryResource, html);
       }
 
       expdatum = new Date(getCache.expiration)
