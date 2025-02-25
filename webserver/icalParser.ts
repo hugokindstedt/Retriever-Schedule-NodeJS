@@ -190,7 +190,7 @@ export default function parseIcalToJson(icalFile: string): IcalEvent[]{
       
       moment = summaryArr[2];
       
-      const newEvent: IcalEvent = {startDate, endDate, startTime, endTime, location, program, kurs, moment};
+      const newEvent = new IcalEvent(startDate, endDate, startTime, endTime, location, program, kurs, moment);
       
       events.push(newEvent);
     }

@@ -30,7 +30,7 @@ export function renderSchema(days: string[]):string{
     let schemaConcat: string = "".concat(...days);
 
     let schema:string = `
-        <div id="schema" class="bg-gray-50 mx-auto max-w-sm">
+        <div id="schema" class="mx-auto max-w-sm">
             ${schemaConcat}
         </div>
     `;
@@ -38,13 +38,26 @@ export function renderSchema(days: string[]):string{
     return schema;
 }
 
+// Week template
+export function renderWeek(days: string[], week: string):string{
+    let weekConcat: string = "".concat(...days);
+
+    let weekTemp: string = `
+        <div id="week" class="mb-4 py-2 rounded-lg shadow-lg">
+            <h1 id="weekNumber" class="font-semibold">V. ${week}</h1>
+            ${weekConcat}
+        </div>
+    `;
+
+    return weekTemp;
+}
+
 // Day template
 export function renderDay(events: string[], date: string):string{
     let eventsConcat: string = "".concat(...events);
 
     let dayTemp: string = `
-        <div class="my-2 shadow bg-blue-300">
-        <!--<div class="my-2 bg-white shadow rounded hover:shadow-lg transition-shadow">-->
+        <div class="bg-blue-300">
             <h2 id="date">${date}</h2>
             <div id="events">
                 ${eventsConcat}

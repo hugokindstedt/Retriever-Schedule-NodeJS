@@ -1,5 +1,4 @@
-import { error } from 'console';
-import {renderHTML, renderBody, renderSchema, renderDay, renderEvent} from './htmlRenderer.js'
+import {renderHTML, renderBody, renderSchema, renderDay, renderEvent, renderWeek} from './htmlRenderer.js'
 import IcalEvent from "./IcalEvent.js";
 const fs = require('node:fs');
 
@@ -66,6 +65,96 @@ function getDay(dateString: string):string{
     }
 }
 
+function groupByDay(IcalArr: IcalEvent[], startDate: string):IcalEvent[]{
+    const dayGroup: IcalEvent[] = IcalArr.filter(event => event.startDate === startDate);
+
+    return dayGroup;
+}
+
+
+function groupByWeek(IcalArr: IcalEvent[], week: string):IcalEvent[]{
+    const weekGroup: IcalEvent[] = IcalArr.filter(event => event.week === week);
+    
+    return weekGroup;
+}
+
+/*
+function createHtmlFile(IcalArr: IcalEvent[]):string{
+    const weeks = new Map<string, Map<string, IcalEvent[]>>();
+
+    for(let event of IcalArr){
+        // Create KEY:VALUE pair if it doesnt exist for that week
+        if(!weeks.has(event.week)){
+            weeks.set(event.week, []);
+        }
+
+        // Add event to week value array
+        weeks.get(event.week)!.push(event);
+    }
+
+
+
+    for(const pair of weeks.entries()){
+        const weekNumber: string = pair[0];
+        const events: IcalEvent[] = pair[1];
+
+
+    }
+
+}
+*/
+
+function createHtmlFile(IcalArr: IcalEvent[]):string{
+    const schema: string[] = [];
+
+    while(IcalArr.length > 0){
+        let currentEvent: IcalEvent = IcalArr[0];
+        let week = groupByWeek(IcalArr, currentEvent.week);
+
+        let weekNumber = week[0].week;
+        let eventsOfTheWeek: string[] = [];
+
+        // Remove elements from original array
+        IcalArr = IcalArr.filter(event => !week.includes(event));
+
+        while(week.length > 0){
+            let currentEvent2: IcalEvent = week[0];
+            const day: IcalEvent[] = groupByDay(week, currentEvent2.startDate);
+
+            // Remove elements from week array
+            week = week.filter(dayEvent => !day.includes(dayEvent));
+
+            const eventsOfTheDay: string[] = [];
+            
+            // FULT
+            let formattedDate: string = day[0].startDate.slice(0, 4)+"-"+day[0].startDate.slice(4, 6)+"-"+day[0].startDate.slice(6);
+            const date = formattedDate+" "+getDay(day[0].startDate);
+
+            // Render events
+            for(let event3 of day){
+                // FULT
+                const eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime))+" - "+formatTime(zuluToCET(event3.endTime)), event3.kurs, event3.moment, event3.location)
+                eventsOfTheDay.push(eventHtml);
+            }
+
+            const dayHtml = renderDay(eventsOfTheDay, date);
+
+            eventsOfTheWeek.push(dayHtml);
+        }
+
+        const weekHtml = renderWeek(eventsOfTheWeek, weekNumber);
+
+        schema.push(weekHtml);
+    }
+    
+    const renderedSchema: string = renderSchema(schema);
+    const renderedBody: string = renderBody(renderedSchema);
+    const renderedHTML: string = renderHTML(renderedBody);
+
+    return renderedHTML;
+}
+
+/*
 function createHtmlFile(IcalEventFile: IcalEvent[]):string{
     const schema: string[] = [];
     let run: number = 0;
@@ -85,10 +174,6 @@ function createHtmlFile(IcalEventFile: IcalEvent[]):string{
             }
         }
 
-        /*for(let x of day){
-            console.log("run: "+run+" "+x.kurs);
-        }*/
-
         const events: string[] = [];
 
         // FULT
@@ -100,12 +185,16 @@ function createHtmlFile(IcalEventFile: IcalEvent[]):string{
         if(day.length > 1){
             // If several events on the same day
             for(let event2 of day){
+                console.log("week: "+event2.week);
+
                 // Döp om "tclone"
                 const tclone = renderEvent(formatTime(zuluToCET(event2.startTime))+" - "+formatTime(zuluToCET(event2.endTime)), event2.kurs, event2.moment, event2.location)
 
                 events.push(tclone);
             }
         }else{
+            console.log("week: "+IcalEventFile[0].week);
+
             // If only one event on the day
             const tclone = renderEvent(formatTime(zuluToCET(IcalEventFile[0].startTime))+" - "+formatTime(zuluToCET(IcalEventFile[0].endTime)), IcalEventFile[0].kurs, IcalEventFile[0].moment, IcalEventFile[0].location);
     
@@ -123,16 +212,10 @@ function createHtmlFile(IcalEventFile: IcalEvent[]):string{
     const renderedBody: string = renderBody(renderedSchema);
     const renderedHTML: string = renderHTML(renderedBody);
 
-    /*
-    fs.writeFile(filePath, renderedHTML, (err: NodeJS.ErrnoException | null) => {
-        if(err){
-            console.error(err);
-        }
-    });
-    */
-
     return renderedHTML;
 }
+*/
+
 
 module.exports = {
     createHtmlFile,
