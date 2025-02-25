@@ -138,7 +138,7 @@ function updateCache(queryResource, html){
   const expirationDate = currentDate+fourHoursInMs;
 
   const update = database.prepare("UPDATE cache SET expiration = ?, html = ? WHERE resource = ?");
-  const insertedItem = insert.run(expirationDate, html, queryResource);
+  const insertedItem = update.run(expirationDate, html, queryResource);
 
   console.log(insertedItem);
 }
