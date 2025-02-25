@@ -225,15 +225,15 @@ const server = createServer(async (req, res) => {
         res.end(html);
 
         updateCache(queryResource, html);
+      }else{
+        expdatum = new Date(getCache.expiration)
+        console.log("gc: "+expdatum);
+        const cachedHtml = getCache.html;
+  
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html');
+        res.end(cachedHtml);
       }
-
-      expdatum = new Date(getCache.expiration)
-      console.log("gc: "+expdatum);
-      const cachedHtml = getCache.html;
-
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/html');
-      res.end(cachedHtml);
     }
   }else if(req.url === '/schema.js'){
     fs.readFile('schema.js', function(err, data){
