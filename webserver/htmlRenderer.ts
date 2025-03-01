@@ -30,7 +30,7 @@ export function renderSchema(days: string[]):string{
     let schemaConcat: string = "".concat(...days);
 
     let schema:string = `
-        <div id="schema" class="mx-auto max-w-sm">
+        <div id="schema" class="mx-auto max-w-mid md:max-w-sm">
             ${schemaConcat}
         </div>
     `;
