@@ -5,5 +5,16 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  
+  theme: {
+    extend: {
+      boxShadow: {
+        'all-sides': '0 0 15px rgba(0, 0, 0, 0.3)',
+      },
+      backgroundImage: {
+        'gray-to-white': 'linear-gradient(to bottom, #D1D5DB 1%, white 100%)',
+      }
+    }
+  }
 }
 

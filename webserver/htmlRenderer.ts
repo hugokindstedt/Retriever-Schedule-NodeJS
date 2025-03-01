@@ -18,7 +18,7 @@ export function renderHTML(body: string):string{
 
 export function renderBody(schema: string):string{
     let body:string = `
-        <body>
+        <body class="bg-stone-200">
             ${schema}
         </body>
     `;
@@ -43,8 +43,11 @@ export function renderWeek(days: string[], week: string):string{
     let weekConcat: string = "".concat(...days);
 
     let weekTemp: string = `
-        <div id="week" class="mb-4 py-2 rounded-lg shadow-lg">
-            <h1 id="weekNumber" class="font-semibold">V. ${week}</h1>
+        <div id="week" class="mb-4 py-2">
+            <div class="flex items-center">
+                <span id="weekNumber" class="mr-2 font-semibold">V. ${week}</span>
+                <div class="flex-grow border-t border-black"></div>
+            </div>
             ${weekConcat}
         </div>
     `;
@@ -57,11 +60,9 @@ export function renderDay(events: string[], date: string):string{
     let eventsConcat: string = "".concat(...events);
 
     let dayTemp: string = `
-        <div class="bg-blue-300">
-            <h2 id="date">${date}</h2>
-            <div id="events">
-                ${eventsConcat}
-            </div>
+        <div id="day" class="mb-4 py-2 pl-4 rounded-lg shadow-all-sides, bg-white">
+            <h2 id="date" class="font-bold">${date}</h2>
+            ${eventsConcat}
         </div>
     `;
 
@@ -71,7 +72,7 @@ export function renderDay(events: string[], date: string):string{
 // Event template
 export function renderEvent(time: string, kurs: string, moment: string, location: string):string{
     let eventTemp: string = `
-        <div class="p-1 bg-white">
+        <div id="event" class="p-1">
             <p id="time" class="font-semibold">${time}</p>
             <p id="kurs" class="text-orange-500">${kurs}</p>
             <p id="moment">${moment}</p>
