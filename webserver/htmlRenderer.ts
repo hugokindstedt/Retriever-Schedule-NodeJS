@@ -8,7 +8,8 @@ export function renderHTML(body: string):string{
             <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
             <link rel="stylesheet" href="output.css">
             <link rel="icon" type="image/x-icon" href="favicon.ico">
-            <title>Retriever | Schema</title>
+            <link rel="apple-touch-icon" href="apple-touch-icon.png">
+            <title>Retriever|Schema</title>
         </head>
     `;
 
