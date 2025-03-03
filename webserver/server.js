@@ -107,6 +107,7 @@ async function downloadSchema(url){
   console.log("downloadSchema called!");
   const response = await fetch(url);
   
+  // OM DENNA FAILAR KRASHAR SERVERN FIXA
   if(!response.ok){
     throw new Error(`502: Error fetching schema: ${response.status}`);
   }
@@ -272,10 +273,23 @@ const server = createServer(async (req, res) => {
         res.end(data);
       }
     });
-  }else{
-    res.statusCode = 404;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('404: Not Found')
+  }else if(req.url === '/favicon.ico'){
+      // FAVICON
+      fs.readFile('favicon.ico', function(err, data){
+        if(err){
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'text/plain');
+          res.end('Server error 500, loading index.html failed')
+        }else{
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'image/x-icon');
+          res.end(data);
+        }
+      });
+    }else{
+      res.statusCode = 404;
+      res.setHeader('Content-Type', 'text/plain');
+      res.end('404: Not Found')
   }
 });
 
