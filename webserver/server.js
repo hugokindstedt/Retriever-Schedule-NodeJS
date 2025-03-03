@@ -298,6 +298,30 @@ const server = createServer(async (req, res) => {
             res.end(data);
           }
         });
+      }else if(req.url === '/apple-touch-icon_180x180.png'){
+        fs.readFile('favicon.ico', function(err, data){
+          if(err){
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Server error 500, loading apple-touch-icon_180x180.png failed')
+          }else{
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'image/png');
+            res.end(data);
+          }
+        });
+      }else if(req.url === '/logo.png'){
+        fs.readFile('favicon.ico', function(err, data){
+          if(err){
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
+            res.end('Server error 500, loading logo.png failed')
+          }else{
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'image/png');
+            res.end(data);
+          }
+        });
       }else{
       res.statusCode = 404;
       res.setHeader('Content-Type', 'text/plain');
