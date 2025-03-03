@@ -8,7 +8,91 @@ function formatTime(time: string):string{
     return formattedTime;
 }
 
-function zuluToCET(timeString: string):string{
+function isSummerTime(dateString: string):boolean{
+    // Parse current date
+    let year = dateString.slice(0, 4);
+    let month = dateString.slice(4, 6);
+    let day = dateString.slice(6);
+
+    let yearInt = parseInt(year);
+    // Months are 0-indexed
+    let monthInt = parseInt(month)-1;
+    let dayInt = parseInt(day);
+
+    const currentDate = new Date(yearInt, monthInt, dayInt);
+
+    // Get last sunday of march
+    const lastOfMarch = new Date(yearInt, 2, 31);
+
+    const lastOfMarchDay = lastOfMarch.getDay();
+
+    let marchOffset!: number;
+
+    switch(lastOfMarchDay){
+        case 0:
+            marchOffset = 0;
+            break;
+        case 1:
+            marchOffset = 1;
+            break;
+        case 2:
+            marchOffset = 2;
+            break;
+        case 3:
+            marchOffset = 3;
+            break;
+        case 4:
+            marchOffset = 4;
+            break;
+        case 5:
+            marchOffset = 5;
+            break;
+        case 6:
+            marchOffset = 6;
+    }
+
+    const lastSundayOfMarch = new Date(yearInt, 2, 31-marchOffset);
+
+    // Get last sunday of october
+    const lastOfOctober = new Date(yearInt, 9, 31);
+    
+    const lastOfOctoberDay = lastOfOctober.getDay();
+
+    let octoberOffset!: number;
+
+    switch(lastOfOctoberDay){
+        case 0:
+            octoberOffset = 0;
+            break;
+        case 1:
+            octoberOffset = 1;
+            break;
+        case 2:
+            octoberOffset = 2;
+            break;
+        case 3:
+            octoberOffset = 3;
+            break;
+        case 4:
+            octoberOffset = 4;
+            break;
+        case 5:
+            octoberOffset = 5;
+            break;
+        case 6:
+            octoberOffset = 6;
+    }
+
+    const lastSundayOfOctober = new Date(yearInt, 9, 31-octoberOffset);
+
+    if((currentDate.getTime() >= lastSundayOfMarch.getTime()) && (currentDate.getTime() <= lastSundayOfOctober.getTime())){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+function zuluToCET(timeString: string, isSummerTime: boolean):string{
     let newTime: string = "N/A";
 
     if(timeString.startsWith("23")){
@@ -19,7 +103,11 @@ function zuluToCET(timeString: string):string{
 
     let time: number = parseInt(timeString);
 
-    time += 100;
+    if(isSummerTime){
+        time += 200;
+    }else{
+        time += 100;
+    }
 
     newTime = time.toString();
 
@@ -133,7 +221,7 @@ function createHtmlFile(IcalArr: IcalEvent[]):string{
             // Render events
             for(let event3 of day){
                 // FULT
-                const eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime))+" - "+formatTime(zuluToCET(event3.endTime)), event3.kurs, event3.moment, event3.location)
+                const eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location)
                 eventsOfTheDay.push(eventHtml);
             }
 
