@@ -1,4 +1,4 @@
-import {renderHTML, renderBody, renderSchema, renderDay, renderEvent, renderWeek} from './htmlRenderer.js'
+import {renderHTML, renderBody, renderSchema, renderDay, renderEvent, renderTentaEvent, renderWeek} from './htmlRenderer.js'
 import IcalEvent from "./IcalEvent.js";
 const fs = require('node:fs');
 
@@ -221,7 +221,12 @@ function createHtmlFile(IcalArr: IcalEvent[]):string{
             // Render events
             for(let event3 of day){
                 // FULT
-                const eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location)
+                let eventHtml
+                if(event3.moment.includes("tenta")){
+                    eventHtml = renderTentaEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location)
+                }else{
+                    eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location)
+                }
                 eventsOfTheDay.push(eventHtml);
             }
 

@@ -21,7 +21,7 @@ export function renderHTML(body: string):string{
 
 export function renderBody(schema: string):string{
     let body:string = `
-        <body class="bg-stone-200">
+        <body class="bg-stone-200 dark:bg-dark-mode-background">
             ${schema}
         </body>
     `;
@@ -48,8 +48,8 @@ export function renderWeek(days: string[], week: string):string{
     let weekTemp: string = `
         <div id="week" class="mb-4 py-2">
             <div class="flex items-center">
-                <span id="weekNumber" class="mr-2 font-semibold">V. ${week}</span>
-                <div class="flex-grow border-t border-black"></div>
+                <span id="weekNumber" class="mr-2 font-semibold dark:text-gray-400">V. ${week}</span>
+                <div class="flex-grow border-t border-black dark:border-gray-400"></div>
             </div>
             ${weekConcat}
         </div>
@@ -63,8 +63,8 @@ export function renderDay(events: string[], date: string):string{
     let eventsConcat: string = "".concat(...events);
 
     let dayTemp: string = `
-        <div id="day" class="mb-4 py-2 pl-4 rounded-lg shadow-all-sides, bg-white">
-            <h2 id="date" class="font-bold">${date}</h2>
+        <div id="day" class="mb-4 py-2 pl-4 rounded-lg shadow-all-sides, bg-white dark:bg-gray-700">
+            <h2 id="date" class="font-bold dark:text-gray-400">${date}</h2>
             ${eventsConcat}
         </div>
     `;
@@ -76,10 +76,23 @@ export function renderDay(events: string[], date: string):string{
 export function renderEvent(time: string, kurs: string, moment: string, location: string):string{
     let eventTemp: string = `
         <div id="event" class="p-1">
-            <p id="time" class="font-semibold">${time}</p>
-            <p id="kurs" class="text-orange-500">${kurs}</p>
-            <p id="moment">${moment}</p>
-            <p id="location">${location}</p>
+            <p id="time" class="font-semibold dark:text-gray-400">${time}</p>
+            <p id="kurs" class="text-orange-500 ">${kurs}</p>
+            <p id="moment" class="dark:text-gray-400">${moment}</p>
+            <p id="location"class="dark:text-gray-400">${location}</p>
+        </div>
+    `;
+
+    return eventTemp;
+}
+
+export function renderTentaEvent(time: string, kurs: string, moment: string, location: string):string{
+    let eventTemp: string = `
+        <div id="event" class="p-1">
+            <p id="time" class="font-semibold dark:text-gray-400">${time}</p>
+            <p id="kurs" class="text-orange-500 ">${kurs}</p>
+            <p id="moment" class="p-1 inline-block bg-amber-500 rounded-md">${moment}</p>
+            <p id="location"class="dark:text-gray-400">${location}</p>
         </div>
     `;
 
