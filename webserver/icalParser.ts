@@ -48,13 +48,19 @@ function extractTime(date: string):string {
   return time;
 }
 
-function parseSummary(summary: string):string[]{
-  const arr: string[] = ["N/A2", "N/A2", "N/A2"];
-  const summaryStruct = {
+function parseSummary(summary: string):Map<string, string>{
+  //const arr: string[] = ["N/A2", "N/A2", "N/A2"];
+  /*const summaryStruct = {
     program: "NO PROGRAM",
     kurs: "NO COURSE",
     moment: "NO MOMENT"
-  };
+  };*/
+
+  let summaryMap = new Map<string, string>();
+  summaryMap.set('program', 'NO PROGRAM');
+  summaryMap.set('course', 'NO COURSE');
+  summaryMap.set('sign', 'NO SIGN');
+  summaryMap.set('moment', 'NO MOMENT');
   
 //Program: Kurs.grp: Sign: Moment: Aktivitetstyp:
 
@@ -62,6 +68,8 @@ function parseSummary(summary: string):string[]{
   programEnd: number = 0,
   kursStart: number = 0,
   kursEnd: number = 0,
+  signStart: number = 0,
+  signEnd: number = 0,
   momentStart: number = 0,
   momentEnd: number = 0;
 
@@ -84,7 +92,7 @@ function parseSummary(summary: string):string[]{
       programEnd = summary.indexOf("Aktivitetstyp: ")-1;
     }
     
-    arr[0] = summary.slice(programStart, programEnd);
+    summaryMap.set('program', summary.slice(programStart, programEnd));
   }
   
   if(kursExists){
@@ -100,7 +108,21 @@ function parseSummary(summary: string):string[]{
       kursEnd = summary.length -1;
     }
 
-    arr[1] = summary.slice(kursStart, kursEnd);
+    summaryMap.set('kurs',summary.slice(kursStart, kursEnd));
+  }
+
+  if(signExists){
+    signStart = (summary.indexOf("Sign: "))+("Sign: ".length);
+    
+    if(momentExists){
+      signEnd = summary.indexOf("Moment: ")-1;
+    }else if(aktivitetstypExists){
+      signEnd = summary.indexOf("Aktivitetstyp: ")-1;
+    }else{
+      signEnd = summary.length -1;
+    }
+    
+    summaryMap.set('sign', summary.slice(signStart, signEnd));
   }
 
   if(momentExists){
@@ -112,11 +134,11 @@ function parseSummary(summary: string):string[]{
       momentEnd = summary.length -1;
     }
     
-    arr[2] = summary.slice(momentStart, momentEnd);
+    summaryMap.set('moment', summary.slice(momentStart, momentEnd));
   }
   
   
-  return arr;
+  return summaryMap;
 }
 
 function removeDuplicateWords(s: string):string{
@@ -151,6 +173,7 @@ export default function parseIcalToJson(icalFile: string): IcalEvent[]{
   summary: string = "N/A",
   program: string = "N/A",
   kurs: string = "N/A",
+  sign: string = "N/A",
   moment: string = "N/A";
   
   const events: IcalEvent[] = [];
@@ -181,16 +204,18 @@ export default function parseIcalToJson(icalFile: string): IcalEvent[]{
       
       location = extractLocation(location);
       
-      let summaryArr: string[] = parseSummary(summary);
+      let summaryMap: Map<string, string> = parseSummary(summary);
       
-      program = summaryArr[0];
+      program = summaryMap.get('program')!;
       
-      kurs = summaryArr[1];
+      kurs = summaryMap.get('kurs')!;
       kurs = removeDuplicateWords(kurs);
       
-      moment = summaryArr[2];
+      sign = summaryMap.get('sign')!;
+
+      moment = summaryMap.get('moment')!;
       
-      const newEvent = new IcalEvent(startDate, endDate, startTime, endTime, location, program, kurs, moment);
+      const newEvent = new IcalEvent(startDate, endDate, startTime, endTime, location, program, kurs, sign, moment);
       
       events.push(newEvent);
     }

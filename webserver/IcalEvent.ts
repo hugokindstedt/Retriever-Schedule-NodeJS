@@ -7,6 +7,7 @@ export default class IcalEvent{
     location: string;
     program: string;
     kurs: string;
+    sign: string;
     moment: string;
 
     // https://en.wikipedia.org/wiki/ISO_week_date
@@ -125,7 +126,7 @@ export default class IcalEvent{
         return weekOfYear.toString()
     }
 
-    constructor(startDate: string, endDate: string, startTime: string, endTime: string, location: string, program: string, kurs: string, moment: string){
+    constructor(startDate: string, endDate: string, startTime: string, endTime: string, location: string, program: string, kurs: string, sign: string, moment: string){
         this.startDate = startDate;
         this.endDate = endDate;
         this.startTime = startTime;
@@ -134,6 +135,7 @@ export default class IcalEvent{
         this.location = location;
         this.program = program;
         this.kurs = kurs;
+        this.sign = sign;
         this.moment = moment;
     }
 }

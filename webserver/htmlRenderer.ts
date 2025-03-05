@@ -73,26 +73,28 @@ export function renderDay(events: string[], date: string):string{
 }
 
 // Event template
-export function renderEvent(time: string, kurs: string, moment: string, location: string):string{
+export function renderEvent(time: string, kurs: string, moment: string, location: string, sign:string):string{
     let eventTemp: string = `
-        <div id="event" class="p-1">
+        <div id="event" class="p-1 group">
             <p id="time" class="font-semibold dark:text-gray-400">${time}</p>
             <p id="kurs" class="text-orange-500 ">${kurs}</p>
             <p id="moment" class="dark:text-gray-400">${moment}</p>
             <p id="location"class="dark:text-gray-400">${location}</p>
+            <p id="sign" class="hidden group-hover:flex dark:text-gray-400">${sign}</p>
         </div>
     `;
 
     return eventTemp;
 }
 
-export function renderTentaEvent(time: string, kurs: string, moment: string, location: string):string{
+export function renderTentaEvent(time: string, kurs: string, moment: string, location: string, sign: string):string{
     let eventTemp: string = `
-        <div id="event" class="p-1">
+        <div id="event" class="p-1 group">
             <p id="time" class="font-semibold dark:text-gray-400">${time}</p>
             <p id="kurs" class="text-orange-500 ">${kurs}</p>
             <p id="moment" class="p-1 inline-block bg-amber-500 rounded-md">${moment}</p>
             <p id="location"class="dark:text-gray-400">${location}</p>
+            <p id="sign" class="hidden group-hover:flex dark:text-gray-400">${sign}</p>
         </div>
     `;
 

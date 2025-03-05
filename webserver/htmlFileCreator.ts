@@ -223,9 +223,9 @@ function createHtmlFile(IcalArr: IcalEvent[]):string{
                 // FULT
                 let eventHtml
                 if(event3.moment.includes("tenta")){
-                    eventHtml = renderTentaEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location)
+                    eventHtml = renderTentaEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location, event3.sign)
                 }else{
-                    eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location)
+                    eventHtml = renderEvent(formatTime(zuluToCET(event3.startTime, isSummerTime(event3.startDate)))+" - "+formatTime(zuluToCET(event3.endTime, isSummerTime(event3.startDate))), event3.kurs, event3.moment, event3.location, event3.sign)
                 }
                 eventsOfTheDay.push(eventHtml);
             }
