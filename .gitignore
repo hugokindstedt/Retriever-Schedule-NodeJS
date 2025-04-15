@@ -1,5 +1,0 @@
-*.ics
-.vscode/
-node_modules/
-.gitignore
-*.db
