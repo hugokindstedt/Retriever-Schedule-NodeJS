@@ -1,3 +1,5 @@
+sqlite3 cache.db
+
 CREATE TABLE cache(resource TEXT PRIMARY KEY, expiration INT, html TEXT);
 
 SELECT * FROM cache WHERE resource = ?
