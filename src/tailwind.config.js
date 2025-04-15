@@ -16,6 +16,9 @@ module.exports = {
       },
       backgroundImage: {
         'gray-to-white': 'linear-gradient(to bottom, #D1D5DB 1%, white 100%)',
+      },
+      colors: {
+        'dark-mode-background': '#0f131e',
       }
     }
   }

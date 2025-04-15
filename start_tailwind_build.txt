@@ -1,0 +1,1 @@
+npx tailwindcss -i mystyle.css -o output.css --watch

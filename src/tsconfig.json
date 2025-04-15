@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "downlevelIteration": true
+    },
+    "files": [
+        "htmlFileCreator.ts",
+        "htmlRenderer.ts",
+        "IcalEvent.ts",
+        "icalParser.ts",
+        "schema.ts"
+    ]
+}

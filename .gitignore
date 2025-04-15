@@ -1,13 +1,5 @@
 *.ics
 .vscode/
-build/
 node_modules/
-package-lock.json
-package.json
-webserver/filer.txt
-webserver/IcalEvent.js
-webserver/icalParser.js
-webserver/package.json
-webserver/schema.ical
-webserver/test.ical
-webserver/tsconfig.json
+.gitignore
+*.db

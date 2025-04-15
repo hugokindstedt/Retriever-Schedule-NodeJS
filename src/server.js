@@ -1,48 +1,16 @@
 const { createServer } = require('node:http');
 const fs = require('fs');
 const { get } = require('https');
-//const IcalEvent = require("./IcalEvent.js");
 const parseIcalFile = require("./icalParser.js").default;
-//const querystring = require('node:querystring');
 const url = require('node:url');
 const { createHtmlFile } = require('./htmlFileCreator.js');
 const { DatabaseSync } = require('node:sqlite');
-
 
 const protocol = 'http://';
 const hostname = 'localhost';
 const port = 3000;
 
 const database = new DatabaseSync("./cache.db");
-
-
-
-
-/*function indexHandle(){
-  fs.readFile('index.html', function(err, data){
-    if(err){
-      res.statusCode = 500;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Server error 500, loading index.html failed')
-    }else{
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/html');
-      res.end(data);
-    }
-  });
-}
-
-const routes = {
-  'GET /' : indexHandle,
-  'GET /schema' : schemaHandle,
-  'GET /download' : downloadHandle,
-  'GET /test' : testHandle,
-  'GET /schema' : schemaHandle,
-  'GET /schema.js' : schemajsHandle,
-  'GET /outputs.css' : outputcssHandle,
-  'GET /test.json' : testjsonHandle,
-};
-*/
 
 async function createNewSchemaHtml(searchQuary){
   const kronoxDownloadUrl = "https://schema.oru.se/setup/jsp/SchemaICAL.ics";
@@ -74,12 +42,6 @@ function checkIfCacheOutOfDate(cachedDate){
   }
 }
 
-/*
-function parseFileName(resurser){
-  return resurser.replace(/[, ]/g, "_");
-}
-*/
-
 function parseResources(resources){
   const parsedResources = resources.replace(/[åäö., ]/ig, (match) => {
     const replacements = {
@@ -95,13 +57,6 @@ function parseResources(resources){
 
   return parsedResources;
 }
-
-// FIXA
-/*
-async function checkDbForResource(resource){
-  const fetchedResource = select.get(resource);
-}
-*/
 
 async function downloadSchema(url){
   console.log("downloadSchema called!");
@@ -236,20 +191,8 @@ const server = createServer(async (req, res) => {
         res.end(cachedHtml);
       }
     }
-  }else if(req.url === '/schema.js'){
-    fs.readFile('schema.js', function(err, data){
-      if(err){
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('500: error loading /js/schema.js')
-      }else{
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/javascript');
-        res.end(data);
-      }
-    });
   }else if(req.url === '/output.css'){
-    fs.readFile('output.css', function(err, data){
+    fs.readFile('../public/output.css', function(err, data){
       if(err){
         res.statusCode = 500;
         res.setHeader('Content-Type', 'text/plain');
@@ -262,7 +205,7 @@ const server = createServer(async (req, res) => {
     });
   }else if(req.url === '/'){
     // INDEX
-    fs.readFile('index.html', function(err, data){
+    fs.readFile('../public/index.html', function(err, data){
       if(err){
         res.statusCode = 500;
         res.setHeader('Content-Type', 'text/plain');
@@ -273,9 +216,9 @@ const server = createServer(async (req, res) => {
         res.end(data);
       }
     });
-  }else if(req.url === '/favicon.ico'){
+  }else if(req.url === 'favicon.ico'){
       // FAVICON
-      fs.readFile('favicon.ico', function(err, data){
+      fs.readFile('../public/favicon.ico', function(err, data){
         if(err){
           res.statusCode = 500;
           res.setHeader('Content-Type', 'text/plain');
@@ -287,7 +230,7 @@ const server = createServer(async (req, res) => {
         }
       });
     }else if(req.url === '/apple-touch-icon.png'){
-        fs.readFile('favicon.ico', function(err, data){
+        fs.readFile('../public/favicon.ico', function(err, data){
           if(err){
             res.statusCode = 500;
             res.setHeader('Content-Type', 'text/plain');
@@ -299,7 +242,7 @@ const server = createServer(async (req, res) => {
           }
         });
       }else if(req.url === '/apple-touch-icon_180x180.png'){
-        fs.readFile('favicon.ico', function(err, data){
+        fs.readFile('../public/favicon.ico', function(err, data){
           if(err){
             res.statusCode = 500;
             res.setHeader('Content-Type', 'text/plain');
@@ -311,7 +254,7 @@ const server = createServer(async (req, res) => {
           }
         });
       }else if(req.url === '/logo.png'){
-        fs.readFile('favicon.ico', function(err, data){
+        fs.readFile('../public/favicon.ico', function(err, data){
           if(err){
             res.statusCode = 500;
             res.setHeader('Content-Type', 'text/plain');
