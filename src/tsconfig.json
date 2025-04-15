@@ -6,7 +6,6 @@
         "htmlFileCreator.ts",
         "htmlRenderer.ts",
         "IcalEvent.ts",
-        "icalParser.ts",
-        "schema.ts"
+        "icalParser.ts"
     ]
 }

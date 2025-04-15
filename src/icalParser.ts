@@ -49,13 +49,6 @@ function extractTime(date: string):string {
 }
 
 function parseSummary(summary: string):Map<string, string>{
-  //const arr: string[] = ["N/A2", "N/A2", "N/A2"];
-  /*const summaryStruct = {
-    program: "NO PROGRAM",
-    kurs: "NO COURSE",
-    moment: "NO MOMENT"
-  };*/
-
   let summaryMap = new Map<string, string>();
   summaryMap.set('program', 'NO PROGRAM');
   summaryMap.set('course', 'NO COURSE');
@@ -147,19 +140,15 @@ function removeDuplicateWords(s: string):string{
   const words = new Set<string>;
   
   for(let word of arr){
-    //console.log(word);
     words.add(word);
   }
   
   for(let word of words){
-    //console.log(word);
     newWord = newWord.concat(word);
     newWord = newWord.concat(" ");
   }
   
   newWord = newWord.trimEnd();
-  
-  //console.log("newword: "+newWord);
   
   return newWord;
 }
@@ -177,12 +166,6 @@ export default function parseIcalToJson(icalFile: string): IcalEvent[]{
   moment: string = "N/A";
   
   const events: IcalEvent[] = [];
-
-  /*
-  if(icalFile !== 'string'){
-    console.log("WTF");
-  }
-  */
   
   const icalFileLines = icalFile.split(/\r?\n/);
   

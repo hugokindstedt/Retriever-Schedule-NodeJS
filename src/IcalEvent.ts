@@ -17,7 +17,6 @@ export default class IcalEvent{
 
         let offset: number;
 
-        //console.log("month: "+month);
         switch(month){
             case 1:
                 offset = 0;
@@ -56,7 +55,6 @@ export default class IcalEvent{
                 offset = 334;
                 break;
             default:
-                //console.log("default offset");
                 offset= 1000;
                 break;
         }
@@ -70,10 +68,7 @@ export default class IcalEvent{
 
         const date2 = new Date(yearInt, monthInt, dayInt);
 
-        //console.log("date2: "+date2);
-        
         let currentDay = date2.getDay();
-        //console.log("curretnDay: "+currentDay)
 
         let dayOfWeek: number;
 
@@ -107,21 +102,11 @@ export default class IcalEvent{
                 dayOfWeek = 6;
                 break;
             default:
-                //console.log("default dayofweek");
                 dayOfWeek = 1000;
                 break;
         }
 
-        //console.log("doy: "+dayOfYear);
-        //console.log("dow: "+dayOfWeek);
         let weekOfYear = Math.floor((10 + dayOfYear - dayOfWeek)/7);
-
-        //console.log("!!!!");
-
-        //console.log(month);
-        //console.log(day);
-        //console.log(weekOfYear);
-        //console.log("-----------");
         
         return weekOfYear.toString()
     }
