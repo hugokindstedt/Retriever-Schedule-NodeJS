@@ -4,7 +4,7 @@
 
 A NodeJS server written in mostly TypeScript that uses SQLite3 for caching. Parses Örebro University KronoX to display a schedule with a modern UI and responsive design using Tailwind CSS.
 
-~~LIVE AT: <https://oruschema.com/>~~
+~~LIVE AT: https://oruschema.com/~~
 ## UPDATE February 10, 2026
 This service is no longer hosted by me. To continue using Retriever, download the iOS app.
 After February 24, 2026, the domain oruschema.com will no longer be maintained or owned by me.
